@@ -5,7 +5,6 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +25,27 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository repository;
 
-    private User user;
+    private User userJan;
+    private User userKlaudia;
 
     @Before
     public void setUp() {
-        user = new User();
-        user.setFirstName("Jan");
-        user.setEmail("john@domain.com");
-        user.setAccountStatus(AccountStatus.NEW);
+        userJan = new User();
+        userJan.setFirstName("Jan");
+        userJan.setLastName("Better");
+        userJan.setEmail("john@domain.com");
+        userJan.setAccountStatus(AccountStatus.NEW);
+
+        userKlaudia = new User();
+        userKlaudia.setFirstName("Klaudia");
+        userKlaudia.setLastName("Best");
+        userKlaudia.setEmail("klaudia@domain.com");
+        userKlaudia.setAccountStatus(AccountStatus.NEW);
     }
 
     @Test
     public void shouldFindOneUserIfRepositoryContainsOneUserEntity() {
-        User persistedUser = entityManager.persist(user);
+        User persistedUser = entityManager.persist(userJan);
         List<User> users = repository.findAll();
 
         Assert.assertThat(users, Matchers.hasSize(1));
@@ -47,9 +54,149 @@ public class UserRepositoryTest {
 
     @Test
     public void shouldStoreANewUser() {
-        User persistedUser = repository.save(user);
+        User persistedUser = repository.save(userJan);
 
         Assert.assertThat(persistedUser.getId(), Matchers.notNullValue());
     }
 
+    @Test
+    public void findOneUserByEmailWhenOneMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "null", userJan.getEmail());
+
+        Assert.assertThat(users, Matchers.hasSize(1));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+    }
+
+    @Test
+    public void findTwoUsersByEmailWhenTwoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "null", "domain");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+        Assert.assertThat(users.get(1).getEmail(), Matchers.equalTo(userKlaudia.getEmail()));
+    }
+
+    @Test
+    public void findNoUsersByEmailWhenNoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "null", "p.lodz.pl");
+
+        Assert.assertThat(users, Matchers.hasSize(0));
+    }
+
+    @Test
+    public void findOneUserByFirstNameWhenOneMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("j", "null", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(1));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+    }
+
+    @Test
+    public void findTwoUsersByFirstNameWhenTwoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("a", "null", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+        Assert.assertThat(users.get(1).getEmail(), Matchers.equalTo(userKlaudia.getEmail()));
+    }
+
+    @Test
+    public void findNoUsersByFirstNameWhenNoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("s", "null", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(0));
+    }
+
+    @Test
+    public void findOneUserByLastNameWhenOneMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "tt", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(1));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+    }
+
+    @Test
+    public void findTwoUsersByLastNameWhenTwoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "be", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+        Assert.assertThat(users.get(0).getEmail(), Matchers.equalTo(userJan.getEmail()));
+        Assert.assertThat(users.get(1).getEmail(), Matchers.equalTo(userKlaudia.getEmail()));
+    }
+
+    @Test
+    public void findNoUsersByLastNameWhenNoMatchingInRepo() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "worse", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(0));
+    }
+
+    @Test
+    public void findUserIgnoresCaseForFirstName() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("A", "null", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+    }
+
+    @Test
+    public void findUserIgnoresCaseForLastName() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "bE", "null");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+    }
+
+    @Test
+    public void findUserIgnoresCaseForEmail() {
+        repository.save(userJan);
+        repository.save(userKlaudia);
+
+        List<User> users = repository.findByFirstNameContainingOrLastNameContainingOrEmailContainingAllIgnoreCase
+                ("null", "null", "dOMAin");
+
+        Assert.assertThat(users, Matchers.hasSize(2));
+    }
 }
