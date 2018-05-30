@@ -1,9 +1,11 @@
 package edu.iis.mto.blog.api;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import edu.iis.mto.blog.domain.repository.UserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -22,6 +24,8 @@ import edu.iis.mto.blog.api.request.UserRequest;
 import edu.iis.mto.blog.dto.Id;
 import edu.iis.mto.blog.services.BlogService;
 import edu.iis.mto.blog.services.DataFinder;
+
+import javax.persistence.EntityNotFoundException;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BlogApi.class)
@@ -51,10 +55,6 @@ public class BlogApiTest {
                 .andExpect(content().string(writeJson(new Id(newUserId))));
     }
 
-    private String writeJson(Object obj) throws JsonProcessingException {
-        return new ObjectMapper().writer().writeValueAsString(obj);
-    }
-
     @Test
     public void throwingDataIntegrityViolationExceptionIsFollowedByHTTPConflictStatus() throws Exception {
         UserRequest user = new UserRequest();
@@ -65,4 +65,15 @@ public class BlogApiTest {
                 .accept(MediaType.APPLICATION_JSON_UTF8).content(content)).andExpect(status().isConflict());
     }
 
+    @Test
+    public void HTTPGetNotExistingUserIsFollowedByHTTPNotFound() throws Exception {
+        Long userId = 1L;
+        Mockito.when(finder.getUserData(userId)).thenThrow(EntityNotFoundException.class);
+
+        mvc.perform(get("/blog/user/{id}", userId)).andExpect(status().isNotFound());
+    }
+
+    private String writeJson(Object obj) throws JsonProcessingException {
+        return new ObjectMapper().writer().writeValueAsString(obj);
+    }
 }
