@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,6 +53,16 @@ public class BlogApiTest {
 
     private String writeJson(Object obj) throws JsonProcessingException {
         return new ObjectMapper().writer().writeValueAsString(obj);
+    }
+
+    @Test
+    public void throwingDataIntegrityViolationExceptionIsFollowedByHTTPConflictStatus() throws Exception {
+        UserRequest user = new UserRequest();
+        Mockito.when(blogService.createUser(user)).thenThrow(DataIntegrityViolationException.class);
+        String content = writeJson(user);
+
+        mvc.perform(post("/blog/user").contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8).content(content)).andExpect(status().isConflict());
     }
 
 }
