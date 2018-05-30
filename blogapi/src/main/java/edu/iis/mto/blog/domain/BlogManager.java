@@ -43,6 +43,11 @@ public class BlogManager extends DomainService implements BlogService {
     public boolean addLikeToPost(Long userId, Long postId) {
         User user = userRepository.findOne(userId);
         BlogPost post = blogPostRepository.findOne(postId);
+
+        if(!user.getAccountStatus().equals(AccountStatus.CONFIRMED)) {
+            throw new DomainError("not confirmed user cannot add likes to post");
+        }
+
         if (post.getUser().getId().equals(userId)) {
             throw new DomainError("cannot like own post");
         }
