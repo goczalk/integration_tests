@@ -1,5 +1,6 @@
 package edu.iis.mto.blog.domain.repository;
 
+import edu.iis.mto.blog.UserBuilder;
 import edu.iis.mto.blog.domain.model.AccountStatus;
 import edu.iis.mto.blog.domain.model.BlogPost;
 import edu.iis.mto.blog.domain.model.LikePost;
@@ -40,15 +41,10 @@ public class LikePostRepositoryTest {
 
     @Before
     public void setUp(){
-        userJan = new User();
-        userJan.setFirstName("Jan");
-        userJan.setEmail("john@domain.com");
-        userJan.setAccountStatus(AccountStatus.NEW);
+        userJan = new UserBuilder().build();
 
-        userKlaudia = new User();
-        userKlaudia.setFirstName("Klaudia");
-        userKlaudia.setEmail("klaudia@domain.com");
-        userKlaudia.setAccountStatus(AccountStatus.NEW);
+        userKlaudia = new UserBuilder().withFirstName("Klaudia")
+                .withLastName("Best").withEmail("klaudia@domain.com").build();
 
         userRepository.save(userJan);
         userRepository.save(userKlaudia);
