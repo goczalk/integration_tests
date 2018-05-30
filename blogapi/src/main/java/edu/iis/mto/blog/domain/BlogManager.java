@@ -50,6 +50,9 @@ public class BlogManager extends DomainService implements BlogService {
         LikePost likePost = new LikePost();
         likePost.setUser(user);
         likePost.setPost(post);
+
+        System.out.println("\n*****" + likePost.getPost().getId() + likePost.getUser().getId() + "*******\n");
+
         likePostRepository.save(likePost);
         return true;
     }
