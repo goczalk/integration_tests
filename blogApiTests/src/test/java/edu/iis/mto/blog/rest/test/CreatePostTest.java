@@ -27,10 +27,3 @@ public class CreatePostTest extends FunctionalTests {
 
     }
 }
-
-
-
-
-
-//Wyszukanie postów użytkownika. Wyszukiwanie postów użytkownika o statusie usunięty nie powinno się powieść. Wyszukiwanie postów powinno zwracać poprawną liczbę polubień.
-//Wyszukanie użytkowników. Rezultat zwracany przez system nie powinien zawierać informacji o użytkownikach usuniętych.
